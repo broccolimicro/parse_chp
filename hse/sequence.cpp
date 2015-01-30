@@ -6,11 +6,11 @@
  */
 
 #include "sequence.h"
-#include "assignment.h"
 #include "condition.h"
 #include "loop.h"
 #include "parallel.h"
 
+#include <prs/assignment.h>
 #include <parse/default/symbol.h>
 
 namespace hse
