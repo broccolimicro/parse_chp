@@ -10,8 +10,8 @@
 #include <prs_lang/guard.h>
 #include "sequence.h"
 
-#ifndef condition_h
-#define condition_h
+#ifndef hse_lang_condition_h
+#define hse_lang_condition_h
 
 namespace hse_lang
 {

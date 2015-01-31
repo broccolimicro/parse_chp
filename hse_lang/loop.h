@@ -10,8 +10,8 @@
 #include <prs_lang/guard.h>
 #include "sequence.h"
 
-#ifndef loop_h
-#define loop_h
+#ifndef hse_lang_loop_h
+#define hse_lang_loop_h
 
 namespace hse_lang
 {

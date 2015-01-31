@@ -8,8 +8,8 @@
 #include <parse/parse.h>
 #include <parse/syntax.h>
 
-#ifndef parallel_h
-#define parallel_h
+#ifndef hse_lang_parallel_h
+#define hse_lang_parallel_h
 
 namespace hse_lang
 {

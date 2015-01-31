@@ -8,8 +8,8 @@
 #include <parse/parse.h>
 #include <parse/syntax.h>
 
-#ifndef sequence_h
-#define sequence_h
+#ifndef hse_lang_sequence_h
+#define hse_lang_sequence_h
 
 namespace hse_lang
 {
