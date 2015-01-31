@@ -11,7 +11,7 @@
 #ifndef parallel_h
 #define parallel_h
 
-namespace hse
+namespace hse_lang
 {
 struct parallel : parse::syntax
 {

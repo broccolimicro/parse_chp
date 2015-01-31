@@ -10,10 +10,10 @@
 #include "loop.h"
 #include "parallel.h"
 
-#include <prs/assignment.h>
+#include <prs_lang/assignment.h>
 #include <parse/default/symbol.h>
 
-namespace hse
+namespace hse_lang
 {
 sequence::sequence()
 {

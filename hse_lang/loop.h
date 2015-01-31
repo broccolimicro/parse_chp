@@ -1,5 +1,5 @@
 /*
- * sequence.h
+ * loop.h
  *
  *  Created on: Jan 18, 2015
  *      Author: nbingham
@@ -7,19 +7,22 @@
 
 #include <parse/parse.h>
 #include <parse/syntax.h>
+#include <prs_lang/guard.h>
+#include "sequence.h"
 
-#ifndef sequence_h
-#define sequence_h
+#ifndef loop_h
+#define loop_h
 
-namespace hse
+namespace hse_lang
 {
-struct sequence : parse::syntax
+struct loop : parse::syntax
 {
-	sequence();
-	sequence(configuration &config, tokenizer &tokens);
-	~sequence();
+	loop();
+	loop(configuration &config, tokenizer &tokens);
+	~loop();
 
-	vector<parse::syntax*> actions;
+	bool deterministic;
+	vector<pair<prs_lang::guard, sequence> > branches;
 
 	void parse(configuration &config, tokenizer &tokens);
 	static bool is_next(configuration &config, tokenizer &tokens, int i = 1);

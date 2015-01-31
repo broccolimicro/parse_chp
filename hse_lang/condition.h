@@ -7,13 +7,13 @@
 
 #include <parse/parse.h>
 #include <parse/syntax.h>
-#include <prs/guard.h>
+#include <prs_lang/guard.h>
 #include "sequence.h"
 
 #ifndef condition_h
 #define condition_h
 
-namespace hse
+namespace hse_lang
 {
 struct condition : parse::syntax
 {
@@ -22,7 +22,7 @@ struct condition : parse::syntax
 	~condition();
 
 	bool deterministic;
-	vector<pair<prs::guard, sequence> > branches;
+	vector<pair<prs_lang::guard, sequence> > branches;
 
 	void parse(configuration &config, tokenizer &tokens);
 	static bool is_next(configuration &config, tokenizer &tokens, int i = 1);

@@ -9,7 +9,7 @@
 
 #include <parse/default/symbol.h>
 
-namespace hse
+namespace hse_lang
 {
 condition::condition()
 {
@@ -66,10 +66,10 @@ void condition::parse(configuration &config, tokenizer &tokens)
 		tokens.expect("->");
 
 		tokens.increment(true);
-		tokens.expect<prs::guard>();
+		tokens.expect<prs_lang::guard>();
 
 		if (tokens.decrement(config, __FILE__, __LINE__))
-			branches.push_back(pair<prs::guard, sequence>(prs::guard(config, tokens), sequence()));
+			branches.push_back(pair<prs_lang::guard, sequence>(prs_lang::guard(config, tokens), sequence()));
 
 		if (tokens.decrement(config, __FILE__, __LINE__))
 		{
@@ -105,7 +105,7 @@ void condition::register_syntax(tokenizer &tokens)
 	if (!tokens.syntax_registered<condition>())
 	{
 		tokens.register_syntax<condition>();
-		prs::guard::register_syntax(tokens);
+		prs_lang::guard::register_syntax(tokens);
 		sequence::register_syntax(tokens);
 		tokens.register_token<parse::symbol>();
 	}

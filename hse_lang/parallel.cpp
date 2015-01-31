@@ -10,10 +10,10 @@
 #include "condition.h"
 #include "loop.h"
 
-#include <prs/assignment.h>
+#include <prs_lang/assignment.h>
 #include <parse/default/symbol.h>
 
-namespace hse
+namespace hse_lang
 {
 parallel::parallel()
 {
@@ -50,7 +50,7 @@ void parallel::parse(configuration &config, tokenizer &tokens, int i)
 		tokens.expect<sequence>();
 	else
 	{
-		tokens.expect<prs::assignment>();
+		tokens.expect<prs_lang::assignment>();
 		tokens.expect<condition>();
 		tokens.expect<loop>();
 		tokens.expect("(");
@@ -60,8 +60,8 @@ void parallel::parse(configuration &config, tokenizer &tokens, int i)
 	{
 		if (tokens.found<sequence>())
 			branches.push_back(new sequence(config, tokens));
-		else if (tokens.found<prs::assignment>())
-			branches.push_back(new prs::assignment(config, tokens));
+		else if (tokens.found<prs_lang::assignment>())
+			branches.push_back(new prs_lang::assignment(config, tokens));
 		else if (tokens.found<condition>())
 			branches.push_back(new condition(config, tokens));
 		else if (tokens.found<loop>())
@@ -95,7 +95,7 @@ void parallel::parse(configuration &config, tokenizer &tokens, int i)
 			tokens.expect<sequence>();
 		else
 		{
-			tokens.expect<prs::assignment>();
+			tokens.expect<prs_lang::assignment>();
 			tokens.expect<condition>();
 			tokens.expect<loop>();
 			tokens.expect("(");
@@ -105,8 +105,8 @@ void parallel::parse(configuration &config, tokenizer &tokens, int i)
 		{
 			if (tokens.found<sequence>())
 				branches.push_back(new sequence(config, tokens));
-			else if (tokens.found<prs::assignment>())
-				branches.push_back(new prs::assignment(config, tokens));
+			else if (tokens.found<prs_lang::assignment>())
+				branches.push_back(new prs_lang::assignment(config, tokens));
 			else if (tokens.found<condition>())
 				branches.push_back(new condition(config, tokens));
 			else if (tokens.found<loop>())
@@ -132,7 +132,7 @@ void parallel::parse(configuration &config, tokenizer &tokens, int i)
 
 bool parallel::is_next(configuration &config, tokenizer &tokens, int i)
 {
-	return (prs::assignment::is_next(config, tokens, i) ||
+	return (prs_lang::assignment::is_next(config, tokens, i) ||
 		    loop::is_next(config, tokens, i) ||
 		    condition::is_next(config, tokens, i) ||
 		    tokens.is_next("(", i));
@@ -145,7 +145,7 @@ void parallel::register_syntax(tokenizer &tokens)
 		tokens.register_syntax<parallel>();
 		tokens.register_token<parse::symbol>();
 		sequence::register_syntax(tokens);
-		prs::assignment::register_syntax(tokens);
+		prs_lang::assignment::register_syntax(tokens);
 		loop::register_syntax(tokens);
 		condition::register_syntax(tokens);
 	}
