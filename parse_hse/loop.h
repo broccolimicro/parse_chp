@@ -7,13 +7,13 @@
 
 #include <parse/parse.h>
 #include <parse/syntax.h>
-#include <prs_lang/guard.h>
+#include <parse_boolean/guard.h>
 #include "sequence.h"
 
-#ifndef hse_lang_loop_h
-#define hse_lang_loop_h
+#ifndef parse_hse_loop_h
+#define parse_hse_loop_h
 
-namespace hse_lang
+namespace parse_hse
 {
 struct loop : parse::syntax
 {
@@ -22,7 +22,7 @@ struct loop : parse::syntax
 	~loop();
 
 	bool deterministic;
-	vector<pair<prs_lang::guard, sequence> > branches;
+	vector<pair<parse_boolean::guard, sequence> > branches;
 
 	void parse(configuration &config, tokenizer &tokens);
 	static bool is_next(configuration &config, tokenizer &tokens, int i = 1);

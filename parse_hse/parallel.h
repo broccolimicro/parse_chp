@@ -8,10 +8,10 @@
 #include <parse/parse.h>
 #include <parse/syntax.h>
 
-#ifndef hse_lang_parallel_h
-#define hse_lang_parallel_h
+#ifndef parse_hse_parallel_h
+#define parse_hse_parallel_h
 
-namespace hse_lang
+namespace parse_hse
 {
 struct parallel : parse::syntax
 {

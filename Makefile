@@ -1,5 +1,5 @@
-SRCDIR       =  hse_lang
-CXXFLAGS	 =  -O2 -g -Wall -fmessage-length=0 -I../parse -I../prs_lang -I../common
+SRCDIR       =  parse_hse
+CXXFLAGS	 =  -O2 -g -Wall -fmessage-length=0 -I../parse_boolean -I../parse -I../common
 SOURCES	    :=  $(shell find $(SRCDIR) -name '*.cpp')
 OBJECTS	    :=  $(SOURCES:%.cpp=%.o)
 TARGET		 =  lib$(SRCDIR).a

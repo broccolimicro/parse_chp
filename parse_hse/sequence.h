@@ -8,10 +8,10 @@
 #include <parse/parse.h>
 #include <parse/syntax.h>
 
-#ifndef hse_lang_sequence_h
-#define hse_lang_sequence_h
+#ifndef parse_hse_sequence_h
+#define parse_hse_sequence_h
 
-namespace hse_lang
+namespace parse_hse
 {
 struct sequence : parse::syntax
 {
