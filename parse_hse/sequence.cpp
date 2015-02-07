@@ -74,7 +74,7 @@ void sequence::register_syntax(tokenizer &tokens)
 	}
 }
 
-string sequence::to_string(string tab)
+string sequence::to_string(string tab) const
 {
 	string result = "";
 	for (int i = 0; i < (int)actions.size(); i++)

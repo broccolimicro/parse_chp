@@ -151,7 +151,7 @@ void parallel::register_syntax(tokenizer &tokens)
 	}
 }
 
-string parallel::to_string(string tab)
+string parallel::to_string(string tab) const
 {
 	string result = "";
 	for (int i = 0; i < (int)branches.size(); i++)

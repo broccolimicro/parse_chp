@@ -111,7 +111,7 @@ void condition::register_syntax(tokenizer &tokens)
 	}
 }
 
-string condition::to_string(string tab)
+string condition::to_string(string tab) const
 {
 	string result = "[";
 	for (int i = 0; i < (int)branches.size(); i++)
