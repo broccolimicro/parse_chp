@@ -18,14 +18,14 @@ namespace parse_hse
 struct loop : parse::syntax
 {
 	loop();
-	loop(configuration &config, tokenizer &tokens);
+	loop(tokenizer &tokens, void *data = NULL);
 	~loop();
 
 	bool deterministic;
 	vector<pair<parse_boolean::guard, sequence> > branches;
 
-	void parse(configuration &config, tokenizer &tokens);
-	static bool is_next(configuration &config, tokenizer &tokens, int i = 1);
+	void parse(tokenizer &tokens, void *data = NULL);
+	static bool is_next(tokenizer &tokens, int i = 1, void *data = NULL);
 	static void register_syntax(tokenizer &tokens);
 
 	string to_string(string tab = "") const;

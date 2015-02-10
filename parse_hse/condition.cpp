@@ -17,11 +17,11 @@ condition::condition()
 	deterministic = true;
 }
 
-condition::condition(configuration &config, tokenizer &tokens)
+condition::condition(tokenizer &tokens, void *data)
 {
 	debug_name = "condition";
 	deterministic = true;
-	parse(config, tokens);
+	parse(tokens, data);
 }
 
 condition::~condition()
@@ -29,9 +29,9 @@ condition::~condition()
 
 }
 
-void condition::parse(configuration &config, tokenizer &tokens)
+void condition::parse(tokenizer &tokens, void *data)
 {
-	valid = true;
+	tokens.syntax_start(this);
 
 	bool locked = false;
 	bool wait = false;
@@ -42,7 +42,7 @@ void condition::parse(configuration &config, tokenizer &tokens)
 	tokens.increment(true);
 	tokens.expect("[");
 
-	while (!wait && tokens.decrement(config, __FILE__, __LINE__))
+	while (!wait && tokens.decrement(__FILE__, __LINE__, data))
 	{
 		if (tokens.found("[]"))
 		{
@@ -68,18 +68,18 @@ void condition::parse(configuration &config, tokenizer &tokens)
 		tokens.increment(true);
 		tokens.expect<parse_boolean::guard>();
 
-		if (tokens.decrement(config, __FILE__, __LINE__))
-			branches.push_back(pair<parse_boolean::guard, sequence>(parse_boolean::guard(config, tokens), sequence()));
+		if (tokens.decrement(__FILE__, __LINE__, data))
+			branches.push_back(pair<parse_boolean::guard, sequence>(parse_boolean::guard(tokens, 0, data), sequence()));
 
-		if (tokens.decrement(config, __FILE__, __LINE__))
+		if (tokens.decrement(__FILE__, __LINE__, data))
 		{
 			tokens.next();
 
 			tokens.increment(true);
 			tokens.expect<sequence>();
 
-			if (tokens.decrement(config, __FILE__, __LINE__) && branches.size() > 0 && !branches.back().second.valid)
-				branches.back().second.parse(config, tokens);
+			if (tokens.decrement(__FILE__, __LINE__, data) && branches.size() > 0 && !branches.back().second.valid)
+				branches.back().second.parse(tokens, data);
 
 			tokens.increment(false);
 			if (deterministic || !locked)
@@ -91,11 +91,13 @@ void condition::parse(configuration &config, tokenizer &tokens)
 		}
 	}
 
-	if (tokens.decrement(config, __FILE__, __LINE__))
+	if (tokens.decrement(__FILE__, __LINE__, data))
 		tokens.next();
+
+	tokens.syntax_end(this);
 }
 
-bool condition::is_next(configuration &config, tokenizer &tokens, int i)
+bool condition::is_next(tokenizer &tokens, int i, void *data)
 {
 	return tokens.is_next("[", i);
 }

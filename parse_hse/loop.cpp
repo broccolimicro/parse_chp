@@ -17,11 +17,11 @@ loop::loop()
 	deterministic = true;
 }
 
-loop::loop(configuration &config, tokenizer &tokens)
+loop::loop(tokenizer &tokens, void *data)
 {
 	debug_name = "loop";
 	deterministic = true;
-	parse(config, tokens);
+	parse(tokens, data);
 }
 
 loop::~loop()
@@ -29,9 +29,9 @@ loop::~loop()
 
 }
 
-void loop::parse(configuration &config, tokenizer &tokens)
+void loop::parse(tokenizer &tokens, void *data)
 {
-	valid = true;
+	tokens.syntax_start(this);
 
 	bool locked = false;
 	bool infinite = false;
@@ -42,7 +42,7 @@ void loop::parse(configuration &config, tokenizer &tokens)
 	tokens.increment(true);
 	tokens.expect("*[");
 
-	while (!infinite && tokens.decrement(config, __FILE__, __LINE__))
+	while (!infinite && tokens.decrement(__FILE__, __LINE__, data))
 	{
 		if (tokens.found("[]"))
 		{
@@ -68,14 +68,14 @@ void loop::parse(configuration &config, tokenizer &tokens)
 		tokens.increment(branches.size() > 0);
 		tokens.expect<parse_boolean::guard>();
 
-		if (tokens.decrement(config, __FILE__, __LINE__))
+		if (tokens.decrement(__FILE__, __LINE__, data))
 		{
-			branches.push_back(pair<parse_boolean::guard, sequence>(parse_boolean::guard(config, tokens), sequence()));
+			branches.push_back(pair<parse_boolean::guard, sequence>(parse_boolean::guard(tokens, 0, data), sequence()));
 
 			tokens.increment(true);
 			tokens.expect("->");
 
-			if (tokens.decrement(config, __FILE__, __LINE__))
+			if (tokens.decrement(__FILE__, __LINE__, data))
 				tokens.next();
 
 			infinite = false;
@@ -83,8 +83,8 @@ void loop::parse(configuration &config, tokenizer &tokens)
 		else
 			branches.push_back(pair<parse_boolean::guard, sequence>(parse_boolean::guard(), sequence()));
 
-		if (tokens.decrement(config, __FILE__, __LINE__))
-			branches.back().second.parse(config, tokens);
+		if (tokens.decrement(__FILE__, __LINE__, data))
+			branches.back().second.parse(tokens, data);
 
 		if (!infinite)
 		{
@@ -96,11 +96,13 @@ void loop::parse(configuration &config, tokenizer &tokens)
 		}
 	}
 
-	if (tokens.decrement(config, __FILE__, __LINE__))
+	if (tokens.decrement(__FILE__, __LINE__, data))
 		tokens.next();
+
+	tokens.syntax_end(this);
 }
 
-bool loop::is_next(configuration &config, tokenizer &tokens, int i)
+bool loop::is_next(tokenizer &tokens, int i, void *data)
 {
 	return tokens.is_next("*[", i);
 }

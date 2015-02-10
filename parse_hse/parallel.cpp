@@ -21,11 +21,11 @@ parallel::parallel()
 	level = -1;
 }
 
-parallel::parallel(configuration &config, tokenizer &tokens, int i)
+parallel::parallel(tokenizer &tokens, int i, void *data)
 {
 	debug_name = "parallel";
 	level = -1;
-	parse(config, tokens, i);
+	parse(tokens, i, data);
 }
 
 parallel::~parallel()
@@ -33,9 +33,10 @@ parallel::~parallel()
 
 }
 
-void parallel::parse(configuration &config, tokenizer &tokens, int i)
+void parallel::parse(tokenizer &tokens, int i, void *data)
 {
-	valid = true;
+	tokens.syntax_start(this);
+
 	level = i;
 
 	vector<string> ops;
@@ -56,16 +57,16 @@ void parallel::parse(configuration &config, tokenizer &tokens, int i)
 		tokens.expect("(");
 	}
 
-	if (tokens.decrement(config, __FILE__, __LINE__))
+	if (tokens.decrement(__FILE__, __LINE__, data))
 	{
 		if (tokens.found<sequence>())
-			branches.push_back(new sequence(config, tokens));
+			branches.push_back(new sequence(tokens, data));
 		else if (tokens.found<parse_boolean::assignment>())
-			branches.push_back(new parse_boolean::assignment(config, tokens));
+			branches.push_back(new parse_boolean::assignment(tokens, data));
 		else if (tokens.found<condition>())
-			branches.push_back(new condition(config, tokens));
+			branches.push_back(new condition(tokens, data));
 		else if (tokens.found<loop>())
-			branches.push_back(new loop(config, tokens));
+			branches.push_back(new loop(tokens, data));
 		else if (tokens.found("("))
 		{
 			tokens.next();
@@ -75,15 +76,15 @@ void parallel::parse(configuration &config, tokenizer &tokens, int i)
 			tokens.increment(true);
 			tokens.expect<parallel>();
 
-			if (tokens.decrement(config, __FILE__, __LINE__))
-				branches.push_back(new parallel(config, tokens));
+			if (tokens.decrement(__FILE__, __LINE__, data))
+				branches.push_back(new parallel(tokens, 0, data));
 
-			if (tokens.decrement(config, __FILE__, __LINE__))
+			if (tokens.decrement(__FILE__, __LINE__, data))
 				tokens.next();
 		}
 	}
 
-	while (tokens.decrement(config, __FILE__, __LINE__))
+	while (tokens.decrement(__FILE__, __LINE__, data))
 	{
 		tokens.next();
 
@@ -101,16 +102,16 @@ void parallel::parse(configuration &config, tokenizer &tokens, int i)
 			tokens.expect("(");
 		}
 
-		if (tokens.decrement(config, __FILE__, __LINE__))
+		if (tokens.decrement(__FILE__, __LINE__, data))
 		{
 			if (tokens.found<sequence>())
-				branches.push_back(new sequence(config, tokens));
+				branches.push_back(new sequence(tokens, data));
 			else if (tokens.found<parse_boolean::assignment>())
-				branches.push_back(new parse_boolean::assignment(config, tokens));
+				branches.push_back(new parse_boolean::assignment(tokens, data));
 			else if (tokens.found<condition>())
-				branches.push_back(new condition(config, tokens));
+				branches.push_back(new condition(tokens, data));
 			else if (tokens.found<loop>())
-				branches.push_back(new loop(config, tokens));
+				branches.push_back(new loop(tokens, data));
 			else if (tokens.found("("))
 			{
 				tokens.next();
@@ -120,21 +121,23 @@ void parallel::parse(configuration &config, tokenizer &tokens, int i)
 				tokens.increment(true);
 				tokens.expect<parallel>();
 
-				if (tokens.decrement(config, __FILE__, __LINE__))
-					branches.push_back(new parallel(config, tokens));
+				if (tokens.decrement(__FILE__, __LINE__, data))
+					branches.push_back(new parallel(tokens, 0, data));
 
-				if (tokens.decrement(config, __FILE__, __LINE__))
+				if (tokens.decrement(__FILE__, __LINE__, data))
 					tokens.next();
 			}
 		}
 	}
+
+	tokens.syntax_end(this);
 }
 
-bool parallel::is_next(configuration &config, tokenizer &tokens, int i)
+bool parallel::is_next(tokenizer &tokens, int i, void *data)
 {
-	return (parse_boolean::assignment::is_next(config, tokens, i) ||
-		    loop::is_next(config, tokens, i) ||
-		    condition::is_next(config, tokens, i) ||
+	return (parse_boolean::assignment::is_next(tokens, i, data) ||
+		    loop::is_next(tokens, i, data) ||
+		    condition::is_next(tokens, i, data) ||
 		    tokens.is_next("(", i));
 }
 

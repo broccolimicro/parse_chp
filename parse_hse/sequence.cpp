@@ -20,10 +20,10 @@ sequence::sequence()
 	debug_name = "sequence";
 }
 
-sequence::sequence(configuration &config, tokenizer &tokens)
+sequence::sequence(tokenizer &tokens, void *data)
 {
 	debug_name = "sequence";
-	parse(config, tokens);
+	parse(tokens, data);
 }
 
 sequence::~sequence()
@@ -31,9 +31,9 @@ sequence::~sequence()
 
 }
 
-void sequence::parse(configuration &config, tokenizer &tokens)
+void sequence::parse(tokenizer &tokens, void *data)
 {
-	valid = true;
+	tokens.syntax_start(this);
 
 	tokens.increment(false);
 	tokens.expect(";");
@@ -41,10 +41,10 @@ void sequence::parse(configuration &config, tokenizer &tokens)
 	tokens.increment(true);
 	tokens.expect<parallel>();
 
-	if (tokens.decrement(config, __FILE__, __LINE__))
-		actions.push_back(new parallel(config, tokens, 1));
+	if (tokens.decrement(__FILE__, __LINE__, data))
+		actions.push_back(new parallel(tokens, 1, data));
 
-	while (tokens.decrement(config, __FILE__, __LINE__))
+	while (tokens.decrement(__FILE__, __LINE__, data))
 	{
 		tokens.next();
 
@@ -54,14 +54,16 @@ void sequence::parse(configuration &config, tokenizer &tokens)
 		tokens.increment(true);
 		tokens.expect<parallel>();
 
-		if (tokens.decrement(config, __FILE__, __LINE__))
-			actions.push_back(new parallel(config, tokens, 1));
+		if (tokens.decrement(__FILE__, __LINE__, data))
+			actions.push_back(new parallel(tokens, 1, data));
 	}
+
+	tokens.syntax_end(this);
 }
 
-bool sequence::is_next(configuration &config, tokenizer &tokens, int i)
+bool sequence::is_next(tokenizer &tokens, int i, void *data)
 {
-	return parallel::is_next(config, tokens, i);
+	return parallel::is_next(tokens, i, data);
 }
 
 void sequence::register_syntax(tokenizer &tokens)

@@ -16,14 +16,14 @@ namespace parse_hse
 struct parallel : parse::syntax
 {
 	parallel();
-	parallel(configuration &config, tokenizer &tokens, int i = 0);
+	parallel(tokenizer &tokens, int i = 0, void *data = NULL);
 	~parallel();
 
 	vector<parse::syntax*> branches;
 	int level;
 
-	void parse(configuration &config, tokenizer &tokens, int i = 0);
-	static bool is_next(configuration &config, tokenizer &tokens, int i = 1);
+	void parse(tokenizer &tokens, int i = 0, void *data = NULL);
+	static bool is_next(tokenizer &tokens, int i = 1, void *data = NULL);
 	static void register_syntax(tokenizer &tokens);
 
 	string to_string(string tab = "") const;

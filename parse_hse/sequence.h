@@ -16,13 +16,13 @@ namespace parse_hse
 struct sequence : parse::syntax
 {
 	sequence();
-	sequence(configuration &config, tokenizer &tokens);
+	sequence(tokenizer &tokens, void *data = NULL);
 	~sequence();
 
 	vector<parse::syntax*> actions;
 
-	void parse(configuration &config, tokenizer &tokens);
-	static bool is_next(configuration &config, tokenizer &tokens, int i = 1);
+	void parse(tokenizer &tokens, void *data = NULL);
+	static bool is_next(tokenizer &tokens, int i = 1, void *data = NULL);
 	static void register_syntax(tokenizer &tokens);
 
 	string to_string(string tab = "") const;
