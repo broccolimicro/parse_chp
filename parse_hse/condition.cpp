@@ -6,7 +6,6 @@
  */
 
 #include "condition.h"
-
 #include <parse/default/symbol.h>
 
 namespace parse_hse
@@ -49,7 +48,7 @@ void condition::parse(tokenizer &tokens, void *data)
 			deterministic = true;
 			locked = true;
 		}
-		else if (tokens.found("|"))
+		else if (tokens.found(":"))
 		{
 			deterministic = false;
 			locked = true;
@@ -66,17 +65,17 @@ void condition::parse(tokenizer &tokens, void *data)
 		tokens.expect("->");
 
 		tokens.increment(true);
-		tokens.expect<parse_boolean::guard>();
+		tokens.expect<parse_boolean::disjunction>();
 
 		if (tokens.decrement(__FILE__, __LINE__, data))
-			branches.push_back(pair<parse_boolean::guard, sequence>(parse_boolean::guard(tokens, 0, data), sequence()));
+			branches.push_back(pair<parse_boolean::disjunction, parallel>(parse_boolean::disjunction(tokens, data), parallel()));
 
 		if (tokens.decrement(__FILE__, __LINE__, data))
 		{
 			tokens.next();
 
 			tokens.increment(true);
-			tokens.expect<sequence>();
+			tokens.expect<parallel>();
 
 			if (tokens.decrement(__FILE__, __LINE__, data) && branches.size() > 0 && !branches.back().second.valid)
 				branches.back().second.parse(tokens, data);
@@ -85,7 +84,7 @@ void condition::parse(tokenizer &tokens, void *data)
 			if (deterministic || !locked)
 				tokens.expect("[]");
 			if (!deterministic || !locked)
-				tokens.expect("|");
+				tokens.expect(":");
 
 			wait = false;
 		}
@@ -107,8 +106,8 @@ void condition::register_syntax(tokenizer &tokens)
 	if (!tokens.syntax_registered<condition>())
 	{
 		tokens.register_syntax<condition>();
-		parse_boolean::guard::register_syntax(tokens);
-		sequence::register_syntax(tokens);
+		parse_boolean::disjunction::register_syntax(tokens);
+		parallel::register_syntax(tokens);
 		tokens.register_token<parse::symbol>();
 	}
 }
@@ -121,7 +120,7 @@ string condition::to_string(string tab) const
 		if (i != 0 && deterministic)
 			result += "[]";
 		else if (i != 0 && !deterministic)
-			result += "|";
+			result += ":";
 
 		result += branches[i].first.to_string(tab);
 		if (branches[i].second.valid)
@@ -130,5 +129,10 @@ string condition::to_string(string tab) const
 	result += "]";
 
 	return result;
+}
+
+parse::syntax *condition::clone() const
+{
+	return new condition(*this);
 }
 }

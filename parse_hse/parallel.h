@@ -7,6 +7,7 @@
 
 #include <parse/parse.h>
 #include <parse/syntax.h>
+#include "sequence.h"
 
 #ifndef parse_hse_parallel_h
 #define parse_hse_parallel_h
@@ -16,17 +17,17 @@ namespace parse_hse
 struct parallel : parse::syntax
 {
 	parallel();
-	parallel(tokenizer &tokens, int i = 0, void *data = NULL);
+	parallel(tokenizer &tokens, void *data = NULL);
 	~parallel();
 
-	vector<parse::syntax*> branches;
-	int level;
+	vector<sequence> branches;
 
-	void parse(tokenizer &tokens, int i = 0, void *data = NULL);
+	void parse(tokenizer &tokens, void *data = NULL);
 	static bool is_next(tokenizer &tokens, int i = 1, void *data = NULL);
 	static void register_syntax(tokenizer &tokens);
 
 	string to_string(string tab = "") const;
+	parse::syntax *clone() const;
 };
 }
 

@@ -33,8 +33,10 @@ void loop::parse(tokenizer &tokens, void *data)
 {
 	tokens.syntax_start(this);
 
+	deterministic = false;
+	bool infinite = true;
 	bool locked = false;
-	bool infinite = false;
+	bool done = false;
 
 	tokens.increment(true);
 	tokens.expect("]");
@@ -42,59 +44,71 @@ void loop::parse(tokenizer &tokens, void *data)
 	tokens.increment(true);
 	tokens.expect("*[");
 
-	while (!infinite && tokens.decrement(__FILE__, __LINE__, data))
-	{
-		if (tokens.found("[]"))
-		{
-			deterministic = true;
-			locked = true;
-		}
-		else if (tokens.found("|"))
-		{
-			deterministic = false;
-			locked = true;
-		}
-		else if (tokens.found("*["))
-		{
-			locked = false;
-			infinite = true;
-		}
-
+	if (tokens.decrement(__FILE__, __LINE__, data))
 		tokens.next();
 
-		tokens.increment(true);
-		tokens.expect<sequence>();
+	tokens.push();
+	int level = 0;
+	while (level >= 0 && infinite)
+	{
+		string token = tokens.next();
+		if (token == "[" || token == "*[")
+			level++;
+		else if (token == "]")
+			level--;
+		else if (level == 0 && token == "->")
+			infinite = false;
+	}
+	tokens.pop();
 
-		tokens.increment(branches.size() > 0);
-		tokens.expect<parse_boolean::guard>();
+	if (infinite)
+	{
+		tokens.increment(true);
+		tokens.expect<parallel>();
 
 		if (tokens.decrement(__FILE__, __LINE__, data))
-		{
-			branches.push_back(pair<parse_boolean::guard, sequence>(parse_boolean::guard(tokens, 0, data), sequence()));
+			branches.push_back(pair<parse_boolean::disjunction, parallel>(parse_boolean::disjunction(), parallel(tokens, data)));
+	}
+	else do
+	{
+		tokens.increment(false);
+		if (!locked || deterministic)
+			tokens.expect("[]");
+		if (!locked || !deterministic)
+			tokens.expect(":");
 
-			tokens.increment(true);
-			tokens.expect("->");
+		tokens.increment(true);
+		tokens.expect<parallel>();
 
-			if (tokens.decrement(__FILE__, __LINE__, data))
-				tokens.next();
+		tokens.increment(true);
+		tokens.expect("->");
 
-			infinite = false;
-		}
+		tokens.increment(true);
+		tokens.expect<parse_boolean::disjunction>();
+
+		if (tokens.decrement(__FILE__, __LINE__, data))
+			branches.push_back(pair<parse_boolean::disjunction, parallel>(parse_boolean::disjunction(tokens, data), parallel()));
 		else
-			branches.push_back(pair<parse_boolean::guard, sequence>(parse_boolean::guard(), sequence()));
+			branches.push_back(pair<parse_boolean::disjunction, parallel>(parse_boolean::disjunction(), parallel()));
+
+		if (tokens.decrement(__FILE__, __LINE__, data))
+			tokens.next();
 
 		if (tokens.decrement(__FILE__, __LINE__, data))
 			branches.back().second.parse(tokens, data);
 
-		if (!infinite)
+		if (tokens.decrement(__FILE__, __LINE__, data))
 		{
-			tokens.increment(false);
-			if (deterministic || !locked)
-				tokens.expect("[]");
-			if (!deterministic || !locked)
-				tokens.expect("|");
+			tokens.next();
+			locked = true;
+			if (tokens.found("[]"))
+				deterministic = true;
+			else if (tokens.found(":"))
+				deterministic = false;
 		}
-	}
+		else
+			done = true;
+	} while (!done);
 
 	if (tokens.decrement(__FILE__, __LINE__, data))
 		tokens.next();
@@ -113,8 +127,8 @@ void loop::register_syntax(tokenizer &tokens)
 	{
 		tokens.register_syntax<loop>();
 		tokens.register_token<parse::symbol>();
-		parse_boolean::guard::register_syntax(tokens);
-		sequence::register_syntax(tokens);
+		parse_boolean::disjunction::register_syntax(tokens);
+		parallel::register_syntax(tokens);
 	}
 }
 
@@ -126,7 +140,7 @@ string loop::to_string(string tab) const
 		if (i != 0 && deterministic)
 			result += "[]";
 		else if (i != 0 && !deterministic)
-			result += "|";
+			result += ":";
 
 		if (branches[i].first.valid)
 			result += branches[i].first.to_string(tab) + "->";
@@ -136,4 +150,10 @@ string loop::to_string(string tab) const
 
 	return result;
 }
+
+parse::syntax *loop::clone() const
+{
+	return new loop(*this);
+}
+
 }

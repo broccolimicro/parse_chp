@@ -7,8 +7,8 @@
 
 #include <parse/parse.h>
 #include <parse/syntax.h>
-#include <parse_boolean/guard.h>
-#include "sequence.h"
+#include <parse_boolean/disjunction.h>
+#include "parallel.h"
 
 #ifndef parse_hse_loop_h
 #define parse_hse_loop_h
@@ -22,13 +22,14 @@ struct loop : parse::syntax
 	~loop();
 
 	bool deterministic;
-	vector<pair<parse_boolean::guard, sequence> > branches;
+	vector<pair<parse_boolean::disjunction, parallel> > branches;
 
 	void parse(tokenizer &tokens, void *data = NULL);
 	static bool is_next(tokenizer &tokens, int i = 1, void *data = NULL);
 	static void register_syntax(tokenizer &tokens);
 
 	string to_string(string tab = "") const;
+	parse::syntax *clone() const;
 };
 }
 
