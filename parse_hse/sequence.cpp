@@ -137,10 +137,18 @@ string sequence::to_string(string tab) const
 		if (i != 0)
 			result += ";";
 
+		bool paren = false;
+		if (actions[i]->is_a<parallel>() && ((parallel*)actions[i])->branches.size() > 1)
+			paren = true;
+
+		if (paren)
+			result += "(";
 		if (actions[i] != NULL && actions[i]->valid)
 			result += actions[i]->to_string(tab);
 		else
 			result += "null";
+		if (paren)
+			result += ")";
 	}
 	return result;
 }
