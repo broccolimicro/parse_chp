@@ -49,6 +49,7 @@ void sequence::parse(tokenizer &tokens, void *data)
 	tokens.expect<condition>();
 	tokens.expect<loop>();
 	tokens.expect("(");
+	tokens.expect("skip");
 
 	if (tokens.decrement(__FILE__, __LINE__, data))
 	{
@@ -67,6 +68,8 @@ void sequence::parse(tokenizer &tokens, void *data)
 			if (tokens.decrement(__FILE__, __LINE__, data))
 				tokens.next();
 		}
+		else if (tokens.found("skip"))
+			tokens.next();
 		else if (tokens.found<condition>())
 			actions.push_back(new condition(tokens, data));
 		else if (tokens.found<loop>())
@@ -87,6 +90,7 @@ void sequence::parse(tokenizer &tokens, void *data)
 		tokens.expect<condition>();
 		tokens.expect<loop>();
 		tokens.expect("(");
+		tokens.expect("skip");
 
 		if (tokens.decrement(__FILE__, __LINE__, data))
 		{
@@ -105,6 +109,8 @@ void sequence::parse(tokenizer &tokens, void *data)
 				if (tokens.decrement(__FILE__, __LINE__, data))
 					tokens.next();
 			}
+			if (tokens.found("skip"))
+				tokens.next();
 			else if (tokens.found<condition>())
 				actions.push_back(new condition(tokens, data));
 			else if (tokens.found<loop>())
@@ -119,7 +125,7 @@ void sequence::parse(tokenizer &tokens, void *data)
 
 bool sequence::is_next(tokenizer &tokens, int i, void *data)
 {
-	return tokens.is_next("(", i) || condition::is_next(tokens, i, data) || loop::is_next(tokens, i, data) || parse_boolean::internal_choice::is_next(tokens, i, data);
+	return tokens.is_next("skip", i) || tokens.is_next("(", i) || condition::is_next(tokens, i, data) || loop::is_next(tokens, i, data) || parse_boolean::internal_choice::is_next(tokens, i, data);
 }
 
 void sequence::register_syntax(tokenizer &tokens)
@@ -156,6 +162,10 @@ string sequence::to_string(string tab) const
 		if (paren)
 			result += ")";
 	}
+
+	if (actions.size() == 0)
+		result = "skip";
+
 	return result;
 }
 
