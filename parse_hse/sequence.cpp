@@ -26,9 +26,15 @@ sequence::sequence(tokenizer &tokens, void *data)
 	parse(tokens, data);
 }
 
+sequence::sequence(const sequence &copy) : parse::syntax(copy)
+{
+	for (int i = 0; i < (int)copy.actions.size(); i++)
+		actions.push_back(copy.actions[i]->clone());
+}
+
 sequence::~sequence()
 {
-
+	clear();
 }
 
 void sequence::parse(tokenizer &tokens, void *data)
@@ -156,6 +162,29 @@ string sequence::to_string(string tab) const
 parse::syntax *sequence::clone() const
 {
 	return new sequence(*this);
+}
+
+sequence &sequence::operator=(const sequence &copy)
+{
+	parse::syntax::operator=(copy);
+
+	for (int i = 0; i < (int)actions.size(); i++)
+		if (actions[i] != NULL)
+			delete actions[i];
+	actions.clear();
+
+	for (int i = 0; i < (int)copy.actions.size(); i++)
+		actions.push_back(copy.actions[i]->clone());
+
+	return *this;
+}
+
+void sequence::clear()
+{
+	for (int i = 0; i < (int)actions.size(); i++)
+		if (actions[i] != NULL)
+			delete actions[i];
+	actions.clear();
 }
 
 }

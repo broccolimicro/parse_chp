@@ -17,6 +17,7 @@ struct sequence : parse::syntax
 {
 	sequence();
 	sequence(tokenizer &tokens, void *data = NULL);
+	sequence(const sequence &s);
 	~sequence();
 
 	vector<parse::syntax*> actions;
@@ -27,6 +28,9 @@ struct sequence : parse::syntax
 
 	string to_string(string tab = "") const;
 	parse::syntax *clone() const;
+
+	sequence &operator=(const sequence &copy);
+	void clear();
 };
 }
 
