@@ -10,7 +10,7 @@
 #include "loop.h"
 #include "parallel.h"
 
-#include <parse_boolean/internal_choice.h>
+#include <parse_boolean/assignment.h>
 #include <parse/default/symbol.h>
 
 namespace parse_hse
@@ -45,7 +45,7 @@ void sequence::parse(tokenizer &tokens, void *data)
 	tokens.expect(";");
 
 	tokens.increment(true);
-	tokens.expect<parse_boolean::internal_choice>();
+	tokens.expect<parse_boolean::assignment>();
 	tokens.expect<condition>();
 	tokens.expect<loop>();
 	tokens.expect("(");
@@ -74,8 +74,8 @@ void sequence::parse(tokenizer &tokens, void *data)
 			actions.push_back(new condition(tokens, data));
 		else if (tokens.found<loop>())
 			actions.push_back(new loop(tokens, data));
-		else if (tokens.found<parse_boolean::internal_choice>())
-			actions.push_back(new parse_boolean::internal_choice(tokens, data));
+		else if (tokens.found<parse_boolean::assignment>())
+			actions.push_back(new parse_boolean::assignment(tokens, parse_boolean::assignment::CHOICE, data));
 	}
 
 	while (tokens.decrement(__FILE__, __LINE__, data))
@@ -86,7 +86,7 @@ void sequence::parse(tokenizer &tokens, void *data)
 		tokens.expect(";");
 
 		tokens.increment(true);
-		tokens.expect<parse_boolean::internal_choice>();
+		tokens.expect<parse_boolean::assignment>();
 		tokens.expect<condition>();
 		tokens.expect<loop>();
 		tokens.expect("(");
@@ -115,8 +115,8 @@ void sequence::parse(tokenizer &tokens, void *data)
 				actions.push_back(new condition(tokens, data));
 			else if (tokens.found<loop>())
 				actions.push_back(new loop(tokens, data));
-			else if (tokens.found<parse_boolean::internal_choice>())
-				actions.push_back(new parse_boolean::internal_choice(tokens, data));
+			else if (tokens.found<parse_boolean::assignment>())
+				actions.push_back(new parse_boolean::assignment(tokens, parse_boolean::assignment::CHOICE, data));
 		}
 	}
 
@@ -125,7 +125,7 @@ void sequence::parse(tokenizer &tokens, void *data)
 
 bool sequence::is_next(tokenizer &tokens, int i, void *data)
 {
-	return tokens.is_next("skip", i) || tokens.is_next("(", i) || condition::is_next(tokens, i, data) || loop::is_next(tokens, i, data) || parse_boolean::internal_choice::is_next(tokens, i, data);
+	return tokens.is_next("skip", i) || tokens.is_next("(", i) || condition::is_next(tokens, i, data) || loop::is_next(tokens, i, data) || parse_boolean::assignment::is_next(tokens, i, data);
 }
 
 void sequence::register_syntax(tokenizer &tokens)
@@ -137,7 +137,7 @@ void sequence::register_syntax(tokenizer &tokens)
 		condition::register_syntax(tokens);
 		loop::register_syntax(tokens);
 		parallel::register_syntax(tokens);
-		parse_boolean::internal_choice::register_syntax(tokens);
+		parse_boolean::assignment::register_syntax(tokens);
 	}
 }
 

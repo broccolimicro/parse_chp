@@ -7,7 +7,7 @@
 
 #include <parse/parse.h>
 #include <parse/syntax.h>
-#include <parse_boolean/disjunction.h>
+#include <parse_boolean/guard.h>
 #include "parallel.h"
 
 #ifndef parse_hse_condition_h
@@ -22,7 +22,7 @@ struct condition : parse::syntax
 	~condition();
 
 	bool deterministic;
-	vector<pair<parse_boolean::disjunction, parallel> > branches;
+	vector<pair<parse_boolean::guard, parallel> > branches;
 
 	void parse(tokenizer &tokens, void *data = NULL);
 	static bool is_next(tokenizer &tokens, int i = 1, void *data = NULL);

@@ -67,7 +67,7 @@ void loop::parse(tokenizer &tokens, void *data)
 		tokens.expect<parallel>();
 
 		if (tokens.decrement(__FILE__, __LINE__, data))
-			branches.push_back(pair<parse_boolean::disjunction, parallel>(parse_boolean::disjunction(), parallel(tokens, data)));
+			branches.push_back(pair<parse_boolean::guard, parallel>(parse_boolean::guard(), parallel(tokens, data)));
 	}
 	else do
 	{
@@ -84,12 +84,12 @@ void loop::parse(tokenizer &tokens, void *data)
 		tokens.expect("->");
 
 		tokens.increment(true);
-		tokens.expect<parse_boolean::disjunction>();
+		tokens.expect<parse_boolean::guard>();
 
 		if (tokens.decrement(__FILE__, __LINE__, data))
-			branches.push_back(pair<parse_boolean::disjunction, parallel>(parse_boolean::disjunction(tokens, data), parallel()));
+			branches.push_back(pair<parse_boolean::guard, parallel>(parse_boolean::guard(tokens, parse_boolean::guard::OR, data), parallel()));
 		else
-			branches.push_back(pair<parse_boolean::disjunction, parallel>(parse_boolean::disjunction(), parallel()));
+			branches.push_back(pair<parse_boolean::guard, parallel>(parse_boolean::guard(), parallel()));
 
 		if (tokens.decrement(__FILE__, __LINE__, data))
 			tokens.next();
@@ -127,7 +127,7 @@ void loop::register_syntax(tokenizer &tokens)
 	{
 		tokens.register_syntax<loop>();
 		tokens.register_token<parse::symbol>();
-		parse_boolean::disjunction::register_syntax(tokens);
+		parse_boolean::guard::register_syntax(tokens);
 		parallel::register_syntax(tokens);
 	}
 }

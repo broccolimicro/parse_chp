@@ -65,10 +65,10 @@ void condition::parse(tokenizer &tokens, void *data)
 		tokens.expect("->");
 
 		tokens.increment(true);
-		tokens.expect<parse_boolean::disjunction>();
+		tokens.expect<parse_boolean::guard>();
 
 		if (tokens.decrement(__FILE__, __LINE__, data))
-			branches.push_back(pair<parse_boolean::disjunction, parallel>(parse_boolean::disjunction(tokens, data), parallel()));
+			branches.push_back(pair<parse_boolean::guard, parallel>(parse_boolean::guard(tokens, parse_boolean::guard::OR, data), parallel()));
 
 		if (tokens.decrement(__FILE__, __LINE__, data))
 		{
@@ -106,7 +106,7 @@ void condition::register_syntax(tokenizer &tokens)
 	if (!tokens.syntax_registered<condition>())
 	{
 		tokens.register_syntax<condition>();
-		parse_boolean::disjunction::register_syntax(tokens);
+		parse_boolean::guard::register_syntax(tokens);
 		parallel::register_syntax(tokens);
 		tokens.register_token<parse::symbol>();
 	}
