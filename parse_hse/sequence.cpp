@@ -12,6 +12,7 @@
 
 #include <parse_boolean/assignment.h>
 #include <parse/default/symbol.h>
+#include <parse/default/number.h>
 
 namespace parse_hse
 {
@@ -56,6 +57,10 @@ void sequence::parse(tokenizer &tokens, void *data)
 		if (tokens.found("("))
 		{
 			tokens.next();
+
+			tokens.increment(false);
+			tokens.expect("'");
+
 			tokens.increment(true);
 			tokens.expect(")");
 
@@ -67,6 +72,17 @@ void sequence::parse(tokenizer &tokens, void *data)
 
 			if (tokens.decrement(__FILE__, __LINE__, data))
 				tokens.next();
+
+			if (tokens.decrement(__FILE__, __LINE__, data))
+			{
+				tokens.next();
+
+				tokens.increment(true);
+				tokens.expect<parse::number>();
+
+				if (tokens.decrement(__FILE__, __LINE__, data))
+					((parallel*)actions.back())->region = tokens.next();
+			}
 		}
 		else if (tokens.found("skip"))
 			tokens.next();
@@ -97,6 +113,10 @@ void sequence::parse(tokenizer &tokens, void *data)
 			if (tokens.found("("))
 			{
 				tokens.next();
+
+				tokens.increment(false);
+				tokens.expect("'");
+
 				tokens.increment(true);
 				tokens.expect(")");
 
@@ -108,6 +128,17 @@ void sequence::parse(tokenizer &tokens, void *data)
 
 				if (tokens.decrement(__FILE__, __LINE__, data))
 					tokens.next();
+
+				if (tokens.decrement(__FILE__, __LINE__, data))
+				{
+					tokens.next();
+
+					tokens.increment(true);
+					tokens.expect<parse::number>();
+
+					if (tokens.decrement(__FILE__, __LINE__, data))
+						((parallel*)actions.back())->region = tokens.next();
+				}
 			}
 			if (tokens.found("skip"))
 				tokens.next();
@@ -134,6 +165,7 @@ void sequence::register_syntax(tokenizer &tokens)
 	{
 		tokens.register_syntax<sequence>();
 		tokens.register_token<parse::symbol>();
+		tokens.register_token<parse::number>();
 		condition::register_syntax(tokens);
 		loop::register_syntax(tokens);
 		parallel::register_syntax(tokens);
@@ -150,8 +182,12 @@ string sequence::to_string(string tab) const
 			result += ";";
 
 		bool paren = false;
-		if (actions[i]->is_a<parallel>() && ((parallel*)actions[i])->branches.size() > 1)
-			paren = true;
+		string id = "";
+		if (actions[i]->is_a<parallel>())
+		{
+			id = ((parallel*)actions[i])->region;
+			paren = ((parallel*)actions[i])->branches.size() > 1 || id != "";
+		}
 
 		if (paren)
 			result += "(";
@@ -161,6 +197,9 @@ string sequence::to_string(string tab) const
 			result += "null";
 		if (paren)
 			result += ")";
+
+		if (id != "")
+			result += "'" + id;
 	}
 
 	if (actions.size() == 0)

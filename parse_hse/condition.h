@@ -23,6 +23,7 @@ struct condition : parse::syntax
 
 	bool deterministic;
 	vector<pair<parse_boolean::guard, parallel> > branches;
+	string region;
 
 	void parse(tokenizer &tokens, void *data = NULL);
 	static bool is_next(tokenizer &tokens, int i = 1, void *data = NULL);

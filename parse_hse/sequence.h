@@ -21,6 +21,7 @@ struct sequence : parse::syntax
 	~sequence();
 
 	vector<parse::syntax*> actions;
+	string region;
 
 	void parse(tokenizer &tokens, void *data = NULL);
 	static bool is_next(tokenizer &tokens, int i = 1, void *data = NULL);

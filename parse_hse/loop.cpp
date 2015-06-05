@@ -8,6 +8,7 @@
 #include "loop.h"
 
 #include <parse/default/symbol.h>
+#include <parse/default/number.h>
 
 namespace parse_hse
 {
@@ -37,6 +38,9 @@ void loop::parse(tokenizer &tokens, void *data)
 	bool infinite = true;
 	bool locked = false;
 	bool done = false;
+
+	tokens.increment(false);
+	tokens.expect("'");
 
 	tokens.increment(true);
 	tokens.expect("]");
@@ -113,6 +117,17 @@ void loop::parse(tokenizer &tokens, void *data)
 	if (tokens.decrement(__FILE__, __LINE__, data))
 		tokens.next();
 
+	if (tokens.decrement(__FILE__, __LINE__, data))
+	{
+		tokens.next();
+
+		tokens.increment(true);
+		tokens.expect<parse::number>();
+
+		if (tokens.decrement(__FILE__, __LINE__, data))
+			region = tokens.next();
+	}
+
 	tokens.syntax_end(this);
 }
 
@@ -127,6 +142,7 @@ void loop::register_syntax(tokenizer &tokens)
 	{
 		tokens.register_syntax<loop>();
 		tokens.register_token<parse::symbol>();
+		tokens.register_token<parse::number>();
 		parse_boolean::guard::register_syntax(tokens);
 		parallel::register_syntax(tokens);
 	}
@@ -147,6 +163,9 @@ string loop::to_string(string tab) const
 		result += branches[i].second.to_string(tab);
 	}
 	result += "]";
+
+	if (region != "")
+		result += "'" + region;
 
 	return result;
 }

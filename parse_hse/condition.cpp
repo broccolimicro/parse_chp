@@ -7,6 +7,7 @@
 
 #include "condition.h"
 #include <parse/default/symbol.h>
+#include <parse/default/number.h>
 
 namespace parse_hse
 {
@@ -34,6 +35,9 @@ void condition::parse(tokenizer &tokens, void *data)
 
 	bool locked = false;
 	bool wait = false;
+
+	tokens.increment(false);
+	tokens.expect("'");
 
 	tokens.increment(true);
 	tokens.expect("]");
@@ -93,6 +97,17 @@ void condition::parse(tokenizer &tokens, void *data)
 	if (tokens.decrement(__FILE__, __LINE__, data))
 		tokens.next();
 
+	if (tokens.decrement(__FILE__, __LINE__, data))
+	{
+		tokens.next();
+
+		tokens.increment(true);
+		tokens.expect<parse::number>();
+
+		if (tokens.decrement(__FILE__, __LINE__, data))
+			region = tokens.next();
+	}
+
 	tokens.syntax_end(this);
 }
 
@@ -109,6 +124,7 @@ void condition::register_syntax(tokenizer &tokens)
 		parse_boolean::guard::register_syntax(tokens);
 		parallel::register_syntax(tokens);
 		tokens.register_token<parse::symbol>();
+		tokens.register_token<parse::number>();
 	}
 }
 
@@ -127,6 +143,9 @@ string condition::to_string(string tab) const
 			result += "->" + branches[i].second.to_string(tab);
 	}
 	result += "]";
+
+	if (region != "")
+		result += "'" + region;
 
 	return result;
 }
