@@ -19,11 +19,13 @@ namespace parse_hse
 sequence::sequence()
 {
 	debug_name = "sequence";
+	reset = -1;
 }
 
 sequence::sequence(tokenizer &tokens, void *data)
 {
 	debug_name = "sequence";
+	reset = -1;
 	parse(tokens, data);
 }
 
@@ -31,6 +33,7 @@ sequence::sequence(const sequence &copy) : parse::syntax(copy)
 {
 	for (int i = 0; i < (int)copy.actions.size(); i++)
 		actions.push_back(copy.actions[i]->clone());
+	reset = copy.reset;
 }
 
 sequence::~sequence()
@@ -45,12 +48,24 @@ void sequence::parse(tokenizer &tokens, void *data)
 	tokens.increment(false);
 	tokens.expect(";");
 
+	tokens.increment(false);
+	tokens.expect("@");
+
 	tokens.increment(true);
 	tokens.expect<parse_boolean::assignment>();
 	tokens.expect<condition>();
 	tokens.expect<loop>();
 	tokens.expect("(");
 	tokens.expect("skip");
+
+	tokens.increment(false);
+	tokens.expect("@");
+
+	if (tokens.decrement(__FILE__, __LINE__, data))
+	{
+		tokens.next();
+		reset = 0;
+	}
 
 	if (tokens.decrement(__FILE__, __LINE__, data))
 	{
@@ -94,12 +109,23 @@ void sequence::parse(tokenizer &tokens, void *data)
 			actions.push_back(new parse_boolean::assignment(tokens, parse_boolean::assignment::CHOICE, data));
 	}
 
+	if (tokens.decrement(__FILE__, __LINE__, data))
+	{
+		tokens.next();
+		if (reset >= 0)
+			tokens.error("only one reset token allowed per sequential", __FILE__, __LINE__);
+		reset = 1;
+	}
+
 	while (tokens.decrement(__FILE__, __LINE__, data))
 	{
 		tokens.next();
 
 		tokens.increment(false);
 		tokens.expect(";");
+
+		tokens.increment(false);
+		tokens.expect("@");
 
 		tokens.increment(true);
 		tokens.expect<parse_boolean::assignment>();
@@ -149,6 +175,14 @@ void sequence::parse(tokenizer &tokens, void *data)
 			else if (tokens.found<parse_boolean::assignment>())
 				actions.push_back(new parse_boolean::assignment(tokens, parse_boolean::assignment::CHOICE, data));
 		}
+
+		if (tokens.decrement(__FILE__, __LINE__, data))
+		{
+			tokens.next();
+			if (reset >= 0)
+				tokens.error("only one reset token allowed per sequential", __FILE__, __LINE__);
+			reset = (int)actions.size();
+		}
 	}
 
 	tokens.syntax_end(this);
@@ -156,7 +190,7 @@ void sequence::parse(tokenizer &tokens, void *data)
 
 bool sequence::is_next(tokenizer &tokens, int i, void *data)
 {
-	return tokens.is_next("skip", i) || tokens.is_next("(", i) || condition::is_next(tokens, i, data) || loop::is_next(tokens, i, data) || parse_boolean::assignment::is_next(tokens, i, data);
+	return tokens.is_next("@", i) || tokens.is_next("skip", i) || tokens.is_next("(", i) || condition::is_next(tokens, i, data) || loop::is_next(tokens, i, data) || parse_boolean::assignment::is_next(tokens, i, data);
 }
 
 void sequence::register_syntax(tokenizer &tokens)
@@ -178,6 +212,9 @@ string sequence::to_string(string tab) const
 	string result = "";
 	for (int i = 0; i < (int)actions.size(); i++)
 	{
+		if (reset == i)
+			result += "@";
+
 		if (i != 0)
 			result += ";";
 
@@ -202,8 +239,11 @@ string sequence::to_string(string tab) const
 			result += "'" + id;
 	}
 
+	if (reset == (int)actions.size())
+		result += "@";
+
 	if (actions.size() == 0)
-		result = "skip";
+		result += "skip";
 
 	return result;
 }
@@ -225,6 +265,8 @@ sequence &sequence::operator=(const sequence &copy)
 	for (int i = 0; i < (int)copy.actions.size(); i++)
 		actions.push_back(copy.actions[i]->clone());
 
+	reset = copy.reset;
+
 	return *this;
 }
 
@@ -234,6 +276,7 @@ void sequence::clear()
 		if (actions[i] != NULL)
 			delete actions[i];
 	actions.clear();
+	reset = -1;
 }
 
 }
