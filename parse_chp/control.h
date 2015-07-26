@@ -1,5 +1,5 @@
 /*
- * loop.h
+ * control.h
  *
  *  Created on: Jan 18, 2015
  *      Author: nbingham
@@ -7,22 +7,26 @@
 
 #include <parse/parse.h>
 #include <parse/syntax.h>
-#include <parse_boolean/guard.h>
-#include "parallel.h"
+#include <parse_expression/expression.h>
 
-#ifndef parse_hse_loop_h
-#define parse_hse_loop_h
+#ifndef parse_chp_control_h
+#define parse_chp_control_h
 
-namespace parse_hse
+namespace parse_chp
 {
-struct loop : parse::syntax
+using parse_expression::expression;
+
+struct composition;
+
+struct control : parse::syntax
 {
-	loop();
-	loop(tokenizer &tokens, void *data = NULL);
-	~loop();
+	control();
+	control(tokenizer &tokens, void *data = NULL);
+	~control();
 
 	bool deterministic;
-	vector<pair<parse_boolean::guard, parallel> > branches;
+	bool repeat;
+	vector<pair<expression, composition> > branches;
 	string region;
 
 	void parse(tokenizer &tokens, void *data = NULL);
