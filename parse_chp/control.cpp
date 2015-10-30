@@ -9,6 +9,8 @@
 #include "composition.h"
 #include <parse/default/symbol.h>
 #include <parse/default/number.h>
+#include <parse/default/white_space.h>
+#include <parse/default/new_line.h>
 
 namespace parse_chp
 {
@@ -159,6 +161,8 @@ void control::register_syntax(tokenizer &tokens)
 		composition::register_syntax(tokens);
 		tokens.register_token<parse::symbol>();
 		tokens.register_token<parse::number>();
+		tokens.register_token<parse::white_space>(false);
+		tokens.register_token<parse::new_line>(false);
 	}
 }
 
