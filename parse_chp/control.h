@@ -25,7 +25,9 @@ struct control : parse::syntax
 	~control();
 
 	bool deterministic;
+	bool stable;
 	bool repeat;
+	bool assume;
 	vector<pair<expression, composition> > branches;
 	string region;
 

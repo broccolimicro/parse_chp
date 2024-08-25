@@ -18,14 +18,18 @@ control::control()
 {
 	debug_name = "control";
 	deterministic = true;
+	stable = true;
 	repeat = false;
+	assume = false;
 }
 
 control::control(tokenizer &tokens, void *data)
 {
 	debug_name = "control";
 	deterministic = true;
+	stable = true;
 	repeat = false;
+	assume = false;
 	parse(tokens, data);
 }
 
@@ -45,33 +49,41 @@ void control::parse(tokenizer &tokens, void *data)
 	tokens.expect("'");
 
 	tokens.increment(true);
-	tokens.expect("]");
-
-	tokens.increment(true);
 	tokens.expect("[");
 	tokens.expect("*[");
+	tokens.expect("{");
 
-	if (tokens.decrement(__FILE__, __LINE__, data))
-		if (tokens.next() == "*[")
-			repeat = true;
+	if (tokens.decrement(__FILE__, __LINE__, data)) {
+		string tok = tokens.next();
+		repeat = (tok == "*[");
+		assume = (tok == "{");
 
-	tokens.push();
-	int level = 0;
-	while (level >= 0 && shortcut)
-	{
-		string token = tokens.next();
-		if (token == "[" || token == "*[")
-			level++;
-		else if (token == "]")
-			level--;
-		else if (level == 0 && token == "->")
-			shortcut = false;
+		if (tok == "{") {
+			tokens.increment(true);
+			tokens.expect("}");
+		} else {
+			tokens.increment(true);
+			tokens.expect("]");
+		}
 	}
-	tokens.pop();
+
+	if (not assume) {
+		tokens.push();
+		int level = 0;
+		while (level >= 0 and shortcut) {
+			string token = tokens.next();
+			if (token == "[" or token == "*[")
+				level++;
+			else if (token == "]")
+				level--;
+			else if (level == 0 && token == "->")
+				shortcut = false;
+		}
+		tokens.pop();
+	}
 
 	bool first = true;
-	if (shortcut)
-	{
+	if (shortcut) {
 		tokens.increment(true);
 		if (repeat)
 			tokens.expect<composition>();
@@ -85,31 +97,31 @@ void control::parse(tokenizer &tokens, void *data)
 			else if (tokens.found<expression>())
 				branches.push_back(pair<expression, composition>(expression(tokens, 0, data), composition()));
 		}
-	}
-	else do
-	{
+	} else do {
 		if (first)
 			first = false;
-		else
-		{
-			if (tokens.found("[]"))
-			{
+		else {
+			if (tokens.found("[]")) {
 				deterministic = true;
 				locked = true;
-			}
-			else if (tokens.found(":"))
-			{
+			} else if (tokens.found(":")) {
 				deterministic = false;
+				locked = true;
+			} else if (tokens.found("::")) {
+				deterministic = false;
+				stable = false;
 				locked = true;
 			}
 			tokens.next();
 		}
 
 		tokens.increment(false);
-		if (deterministic || !locked)
+		if (deterministic or not locked)
 			tokens.expect("[]");
-		if (!deterministic || !locked)
+		if ((not deterministic and stable) or not locked)
 			tokens.expect(":");
+		if ((not deterministic and not stable) or not locked)
+			tokens.expect("::");
 
 		tokens.increment(true);
 		tokens.expect<composition>();
@@ -149,7 +161,7 @@ void control::parse(tokenizer &tokens, void *data)
 
 bool control::is_next(tokenizer &tokens, int i, void *data)
 {
-	return tokens.is_next("*[", i) || tokens.is_next("[", i);
+	return tokens.is_next("*[", i) or tokens.is_next("[", i) or tokens.is_next("{", i);
 }
 
 void control::register_syntax(tokenizer &tokens)
@@ -175,24 +187,25 @@ string control::to_string(string tab) const
 	if (repeat)
 		result += "*";
 
-	result += "[";
-	for (int i = 0; i < (int)branches.size(); i++)
-	{
-		if (i != 0 && deterministic)
+	result += assume ? "{" : "[";
+	for (int i = 0; i < (int)branches.size(); i++) {
+		if (i != 0 and deterministic)
 			result += "[]";
-		else if (i != 0 && !deterministic)
+		else if (i != 0 and not deterministic and stable)
 			result += ":";
+		else if (i != 0 and not deterministic and not stable)
+			result += "::";
 
 		if (branches[i].first.valid)
 			result += branches[i].first.to_string(tab);
 
-		if (branches[i].first.valid && branches[i].second.valid)
+		if (branches[i].first.valid and branches[i].second.valid)
 			result += "->";
 
 		if (branches[i].second.valid)
 			result += branches[i].second.to_string(tab);
 	}
-	result += "]";
+	result += assume ? "}" : "]";
 
 	if (region != "")
 		result += "'" + region;
