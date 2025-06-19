@@ -176,34 +176,38 @@ string composition::to_string(string tab) const
 	return to_string(-1, tab);
 }
 
-string composition::to_string(int prev_level, string tab) const
-{
-	if (!valid || branches.size() == 0)
+string composition::to_string(int prev_level, string tab) const {
+	if (!valid or branches.size() == 0) {
 		return "skip";
-
-	string result = "";
-	if (prev_level > level || region != "")
-		result += "(";
-
-	if (reset == 0)
-		result += "@";
-
-	for (int i = 0; i < (int)branches.size(); i++)
-	{
-		if (i != 0)
-			result += precedence[level];
-
-		result += branches[i].to_string(level, tab);
-
-		if (reset == i+1)
-			result += "@";
 	}
 
-	if (prev_level > level || region != "")
-		result += ")";
+	string result = "";
+	if (prev_level > level or region != "") {
+		result += "(";
+	}
 
-	if (region != "")
+	if (reset == 0) {
+		result += "@";
+	}
+
+	for (int i = 0; i < (int)branches.size(); i++) {
+		if (i != 0) {
+			result += precedence[level];
+		}
+		if (reset == i) {
+			result += "@";
+		}
+
+		result += branches[i].to_string(level, tab);
+	}
+
+	if (prev_level > level or region != "") {
+		result += ")";
+	}
+
+	if (region != "") {
 		result += "'" + region;
+	}
 
 	return result;
 }
