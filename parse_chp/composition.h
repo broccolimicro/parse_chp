@@ -1,22 +1,12 @@
-/*
- * composition.h
- *
- *  Created on: Jan 18, 2015
- *      Author: nbingham
- */
+#pragma once
 
 #include <parse/parse.h>
 #include <parse/syntax.h>
 #include "control.h"
-#include <parse_expression/assignment.h>
-
-#ifndef parse_chp_composition_h
-#define parse_chp_composition_h
+#include "expression.h"
 
 namespace parse_chp
 {
-using parse_expression::assignment;
-
 struct branch;
 
 struct composition : parse::syntax
@@ -58,5 +48,3 @@ struct branch
 	string to_string(int level, string tab) const;
 };
 }
-
-#endif

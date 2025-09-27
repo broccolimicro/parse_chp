@@ -8,7 +8,6 @@ namespace parse_chp
 
 parse::syntax *produce(tokenizer &tokens, void *data=nullptr);
 void expect(tokenizer &tokens);
-void setup_expressions();
 void register_syntax(tokenizer &tokens);
 
 }

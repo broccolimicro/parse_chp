@@ -16,7 +16,7 @@ namespace parse_chp
 {
 control::control()
 {
-	debug_name = "control";
+	debug_name = "chp_control";
 	deterministic = true;
 	stable = true;
 	repeat = false;
@@ -25,7 +25,7 @@ control::control()
 
 control::control(tokenizer &tokens, void *data)
 {
-	debug_name = "control";
+	debug_name = "chp_control";
 	deterministic = true;
 	stable = true;
 	repeat = false;

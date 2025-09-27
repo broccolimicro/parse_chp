@@ -1,25 +1,13 @@
-/*
- * control.h
- *
- *  Created on: Jan 18, 2015
- *      Author: nbingham
- */
+#pragma once
 
 #include <parse/parse.h>
 #include <parse/syntax.h>
-#include <parse_expression/expression.h>
+#include "expression.h"
 
-#ifndef parse_chp_control_h
-#define parse_chp_control_h
-
-namespace parse_chp
-{
-using parse_expression::expression;
-
+namespace parse_chp {
 struct composition;
 
-struct control : parse::syntax
-{
+struct control : parse::syntax {
 	control();
 	control(tokenizer &tokens, void *data = NULL);
 	~control();
@@ -38,6 +26,5 @@ struct control : parse::syntax
 	string to_string(string tab = "") const;
 	parse::syntax *clone() const;
 };
-}
 
-#endif
+}

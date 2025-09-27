@@ -1,10 +1,3 @@
-/*
- * composition.cpp
- *
- *  Created on: Jan 18, 2015
- *      Author: nbingham
- */
-
 #include "composition.h"
 
 #include <parse/default/symbol.h>
@@ -19,7 +12,7 @@ vector<string> composition::precedence;
 
 composition::composition()
 {
-	debug_name = "composition";
+	debug_name = "chp_composition";
 	level = 0;
 	reset = -1;
 	init();
@@ -27,7 +20,7 @@ composition::composition()
 
 composition::composition(tokenizer &tokens, int level, void *data)
 {
-	debug_name = "composition";
+	debug_name = "chp_composition";
 	this->level = level;
 	reset = -1;
 	init();
@@ -157,10 +150,9 @@ bool composition::is_next(tokenizer &tokens, int i, void *data)
 	return tokens.is_next("@", i) || tokens.is_next("(", i) || control::is_next(tokens, i, data) || assignment::is_next(tokens, i, data);
 }
 
-void composition::register_syntax(tokenizer &tokens)
-{
-	if (!tokens.syntax_registered<composition>())
-	{
+void composition::register_syntax(tokenizer &tokens) {
+	if (!tokens.syntax_registered<composition>()) {
+		setup_expressions();
 		tokens.register_syntax<composition>();
 		tokens.register_token<parse::symbol>();
 		tokens.register_token<parse::number>();
