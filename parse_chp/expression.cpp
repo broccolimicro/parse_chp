@@ -20,7 +20,7 @@ void setup_expressions() {
 
 		result.push(parse_expression::operation_set::BINARY);
 		result.push_back("", "", "==", "");
-		result.push_back("", "", "~=", "");
+		result.push_back("", "", "!=", "");
 		result.push_back("", "", "<", "");
 		result.push_back("", "", ">", "");
 		result.push_back("", "", "<=", "");
@@ -31,9 +31,6 @@ void setup_expressions() {
 		
 		result.push(parse_expression::operation_set::BINARY);
 		result.push_back("", "", "&&", "");
-
-		result.push(parse_expression::operation_set::BINARY);
-		result.push_back("", "", "^^", "");
 
 		result.push(parse_expression::operation_set::BINARY);
 		result.push_back("", "", "<<", "");
