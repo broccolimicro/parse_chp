@@ -23,7 +23,7 @@ control::control()
 	assume = false;
 }
 
-control::control(tokenizer &tokens, void *data)
+control::control(tokenizer &tokens, std::any data)
 {
 	debug_name = "chp_control";
 	deterministic = true;
@@ -38,7 +38,7 @@ control::~control()
 
 }
 
-void control::parse(tokenizer &tokens, void *data)
+void control::parse(tokenizer &tokens, std::any data)
 {
 	tokens.syntax_start(this);
 
@@ -53,7 +53,7 @@ void control::parse(tokenizer &tokens, void *data)
 	tokens.expect("*[");
 	tokens.expect("{");
 
-	if (tokens.decrement(__FILE__, __LINE__, data)) {
+	if (tokens.decrement(__FILE__, __LINE__)) {
 		string tok = tokens.next();
 		repeat = (tok == "*[");
 		assume = (tok == "{");
@@ -86,16 +86,16 @@ void control::parse(tokenizer &tokens, void *data)
 	if (shortcut) {
 		tokens.increment(true);
 		if (repeat)
-			tokens.expect<composition>();
+			tokens.expect<composition>(data);
 		else
 			tokens.expect<expression>();
 
-		if (tokens.decrement(__FILE__, __LINE__, data))
+		if (tokens.decrement(__FILE__, __LINE__))
 		{
 			if (tokens.found<composition>())
 				branches.push_back(pair<expression, composition>(expression(), composition(tokens, 0, data)));
 			else if (tokens.found<expression>())
-				branches.push_back(pair<expression, composition>(expression(tokens, 0, data), composition()));
+				branches.push_back(pair<expression, composition>(expression(tokens, 0), composition()));
 		}
 	} else do {
 		if (first)
@@ -124,7 +124,7 @@ void control::parse(tokenizer &tokens, void *data)
 			tokens.expect("::");
 
 		tokens.increment(true);
-		tokens.expect<composition>();
+		tokens.expect<composition>(data);
 
 		tokens.increment(true);
 		tokens.expect("->");
@@ -132,42 +132,38 @@ void control::parse(tokenizer &tokens, void *data)
 		tokens.increment(true);
 		tokens.expect<expression>();
 
-		if (tokens.decrement(__FILE__, __LINE__, data))
-			branches.push_back(pair<expression, composition>(expression(tokens, 0, data), composition()));
+		if (tokens.decrement(__FILE__, __LINE__))
+			branches.push_back(pair<expression, composition>(expression(tokens, 0), composition()));
 
-		if (tokens.decrement(__FILE__, __LINE__, data))
+		if (tokens.decrement(__FILE__, __LINE__))
 			tokens.next();
 
-		if (tokens.decrement(__FILE__, __LINE__, data))
+		if (tokens.decrement(__FILE__, __LINE__))
 			branches.back().second.parse(tokens, data);
-	} while (tokens.decrement(__FILE__, __LINE__, data));
+	} while (tokens.decrement(__FILE__, __LINE__));
 
-	if (tokens.decrement(__FILE__, __LINE__, data))
+	if (tokens.decrement(__FILE__, __LINE__))
 		tokens.next();
 
-	if (tokens.decrement(__FILE__, __LINE__, data))
-	{
+	if (tokens.decrement(__FILE__, __LINE__)) {
 		tokens.next();
 
 		tokens.increment(true);
 		tokens.expect<parse::number>();
 
-		if (tokens.decrement(__FILE__, __LINE__, data))
+		if (tokens.decrement(__FILE__, __LINE__))
 			region = tokens.next();
 	}
 
 	tokens.syntax_end(this);
 }
 
-bool control::is_next(tokenizer &tokens, int i, void *data)
-{
+bool control::is_next(tokenizer &tokens, int i, std::any data) {
 	return tokens.is_next("*[", i) or tokens.is_next("[", i) or tokens.is_next("{", i);
 }
 
-void control::register_syntax(tokenizer &tokens)
-{
-	if (!tokens.syntax_registered<control>())
-	{
+void control::register_syntax(tokenizer &tokens) {
+	if (!tokens.syntax_registered<control>()) {
 		tokens.register_syntax<control>();
 		expression::register_syntax(tokens);
 		composition::register_syntax(tokens);
@@ -178,14 +174,14 @@ void control::register_syntax(tokenizer &tokens)
 	}
 }
 
-string control::to_string(string tab) const
-{
-	if (!valid || branches.size() == 0)
+string control::to_string(string tab) const {
+	if (not valid or branches.size() == 0)
 		return "skip";
 
 	string result = "";
-	if (repeat)
+	if (repeat) {
 		result += "*";
+	}
 
 	result += assume ? "{" : "[";
 	for (int i = 0; i < (int)branches.size(); i++) {
@@ -213,8 +209,7 @@ string control::to_string(string tab) const
 	return result;
 }
 
-parse::syntax *control::clone() const
-{
+parse::syntax *control::clone() const {
 	return new control(*this);
 }
 }

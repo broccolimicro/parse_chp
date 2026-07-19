@@ -9,7 +9,7 @@ struct composition;
 
 struct control : parse::syntax {
 	control();
-	control(tokenizer &tokens, void *data = NULL);
+	control(tokenizer &tokens, std::any data={});
 	~control();
 
 	bool deterministic;
@@ -19,8 +19,8 @@ struct control : parse::syntax {
 	vector<pair<expression, composition> > branches;
 	string region;
 
-	void parse(tokenizer &tokens, void *data = NULL);
-	static bool is_next(tokenizer &tokens, int i = 1, void *data = NULL);
+	void parse(tokenizer &tokens, std::any data={});
+	static bool is_next(tokenizer &tokens, int i = 1, std::any data={});
 	static void register_syntax(tokenizer &tokens);
 
 	string to_string(string tab = "") const;

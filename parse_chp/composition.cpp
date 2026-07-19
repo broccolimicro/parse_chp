@@ -18,7 +18,7 @@ composition::composition()
 	init();
 }
 
-composition::composition(tokenizer &tokens, int level, void *data)
+composition::composition(tokenizer &tokens, int level, std::any data)
 {
 	debug_name = "chp_composition";
 	this->level = level;
@@ -41,7 +41,7 @@ void composition::init()
 	}
 }
 
-void composition::parse(tokenizer &tokens, void *data)
+void composition::parse(tokenizer &tokens, std::any data)
 {
 	tokens.syntax_start(this);
 
@@ -58,7 +58,7 @@ void composition::parse(tokenizer &tokens, void *data)
 			tokens.increment(false);
 			tokens.expect("@");
 
-			if (tokens.decrement(__FILE__, __LINE__, data))
+			if (tokens.decrement(__FILE__, __LINE__))
 			{
 				if (reset == -1)
 					reset = branches.size();
@@ -74,23 +74,23 @@ void composition::parse(tokenizer &tokens, void *data)
 
 		tokens.increment(true);
 		if (level < (int)precedence.size()-1)
-			tokens.expect<composition>();
+			tokens.expect<composition>(data);
 		else
 		{
-			tokens.expect<control>();
+			tokens.expect<control>(data);
 			tokens.expect<assignment>();
 			tokens.expect("(");
 			tokens.expect("skip");
 		}
 
-		if (tokens.decrement(__FILE__, __LINE__, data))
+		if (tokens.decrement(__FILE__, __LINE__))
 		{
 			if (tokens.found<composition>())
 				branches.push_back(branch(composition(tokens, level+1, data)));
 			else if (tokens.found<control>())
 				branches.push_back(branch(control(tokens, data)));
 			else if (tokens.found<assignment>())
-				branches.push_back(branch(assignment(tokens, data)));
+				branches.push_back(branch(assignment(tokens)));
 			else if (tokens.found("skip"))
 				tokens.next();
 			else if (tokens.found("("))
@@ -106,32 +106,32 @@ void composition::parse(tokenizer &tokens, void *data)
 				tokens.increment(true);
 				tokens.expect<composition>();
 
-				if (tokens.decrement(__FILE__, __LINE__, data))
+				if (tokens.decrement(__FILE__, __LINE__))
 					branches.push_back(branch(composition(tokens, 0, data)));
 
-				if (tokens.decrement(__FILE__, __LINE__, data))
+				if (tokens.decrement(__FILE__, __LINE__))
 					tokens.next();
 
-				if (tokens.decrement(__FILE__, __LINE__, data))
+				if (tokens.decrement(__FILE__, __LINE__))
 				{
 					tokens.next();
 
 					tokens.increment(true);
 					tokens.expect<parse::number>();
 
-					if (tokens.decrement(__FILE__, __LINE__, data))
+					if (tokens.decrement(__FILE__, __LINE__))
 						branches.back().sub.region = tokens.next();
 				}
 			}
 		}
-	} while (tokens.decrement(__FILE__, __LINE__, data));
+	} while (tokens.decrement(__FILE__, __LINE__));
 
 	if (precedence[level] == ";")
 	{
 		tokens.increment(false);
 		tokens.expect("@");
 
-		if (tokens.decrement(__FILE__, __LINE__, data))
+		if (tokens.decrement(__FILE__, __LINE__))
 		{
 			if (reset == -1)
 				reset = branches.size();
@@ -145,14 +145,13 @@ void composition::parse(tokenizer &tokens, void *data)
 	tokens.syntax_end(this);
 }
 
-bool composition::is_next(tokenizer &tokens, int i, void *data)
+bool composition::is_next(tokenizer &tokens, int i, std::any data)
 {
-	return tokens.is_next("@", i) || tokens.is_next("(", i) || control::is_next(tokens, i, data) || assignment::is_next(tokens, i, data);
+	return tokens.is_next("@", i) || tokens.is_next("(", i) || control::is_next(tokens, i, data) || assignment::is_next(tokens, i);
 }
 
 void composition::register_syntax(tokenizer &tokens) {
 	if (!tokens.syntax_registered<composition>()) {
-		setup_expressions();
 		tokens.register_syntax<composition>();
 		tokens.register_token<parse::symbol>();
 		tokens.register_token<parse::number>();

@@ -12,7 +12,7 @@ struct branch;
 struct composition : parse::syntax
 {
 	composition();
-	composition(tokenizer &tokens, int level = 0, void *data = NULL);
+	composition(tokenizer &tokens, int level = 0, std::any data={});
 	~composition();
 
 	void init();
@@ -24,8 +24,8 @@ struct composition : parse::syntax
 
 	static vector<string> precedence;
 
-	void parse(tokenizer &tokens, void *data = NULL);
-	static bool is_next(tokenizer &tokens, int i = 1, void *data = NULL);
+	void parse(tokenizer &tokens, std::any data={});
+	static bool is_next(tokenizer &tokens, int i = 1, std::any data={});
 	static void register_syntax(tokenizer &tokens);
 
 	string to_string(string tab = "") const;
