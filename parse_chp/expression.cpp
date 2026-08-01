@@ -27,7 +27,7 @@ parse_expression::config makeExprConfig() {
 	parse_expression::config cfg;
 	int CONSTANT = cfg.push<constant>("constant");
 	int LITERAL = cfg.push<literal>("literal");
-	int TYPE = cfg.push<type_name>("type");
+	/*int TYPE = */cfg.push<type_name>("type");
 	int TERM = cfg.push<term_name>("term");
 	int LABEL = cfg.push<label>("label");
 
@@ -55,7 +55,7 @@ parse_expression::config makeExprConfig() {
 
 	cfg.order.push(operation_set::BINARY);
 	cfg.order.push_back("", "", "==", "");
-	cfg.order.push_back("", "", "~=", "");
+	cfg.order.push_back("", "", "!=", "");
 	cfg.order.push_back("", "", "<", "");
 	cfg.order.push_back("", "", ">", "");
 	cfg.order.push_back("", "", "<=", "");
